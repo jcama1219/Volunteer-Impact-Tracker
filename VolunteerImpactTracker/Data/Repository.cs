@@ -9,10 +9,11 @@ namespace VolunteerImpactTracker.Data
     {
         private readonly string hoursFile = "hours.txt";
         private readonly string eventsFile = "events.txt";
+        private readonly string impactFile = "impact.txt";
 
-        // ---------- HOURS ----------
+        // HOURS 
 
-        public void SaveHourEntry(VolunteerHourEntry entry)
+        public virtual void SaveHourEntry(VolunteerHourEntry entry)
         {
             using (StreamWriter writer = new StreamWriter(hoursFile, true))
             {
@@ -20,7 +21,7 @@ namespace VolunteerImpactTracker.Data
             }
         }
 
-        public List<VolunteerHourEntry> GetAllHourEntries()
+        public virtual List<VolunteerHourEntry> GetAllHourEntries()
         {
             var entries = new List<VolunteerHourEntry>();
 
@@ -29,7 +30,11 @@ namespace VolunteerImpactTracker.Data
 
             foreach (var line in File.ReadAllLines(hoursFile))
             {
+                if (string.IsNullOrWhiteSpace(line))
+                    continue;
+
                 var parts = line.Split('|');
+
                 if (parts.Length == 3)
                 {
                     entries.Add(new VolunteerHourEntry
@@ -44,19 +49,17 @@ namespace VolunteerImpactTracker.Data
             return entries;
         }
 
-        // ---------- EVENTS ----------
+        //  EVENTS 
 
-        public void SaveEvent(VolunteerEvent ev)
+        public virtual void SaveEvent(VolunteerEvent ev)
         {
             using (StreamWriter writer = new StreamWriter(eventsFile, true))
             {
-                writer.WriteLine(
-                    $"{ev.EventName}|{ev.Organization}|{ev.EventDate:yyyy-MM-dd}|{ev.StartTime}|{ev.EndTime}"
-                );
+                writer.WriteLine($"{ev.EventName}|{ev.Organization}|{ev.EventDate:yyyy-MM-dd}|{ev.StartTime}|{ev.EndTime}");
             }
         }
 
-        public List<VolunteerEvent> GetAllEvents()
+        public virtual List<VolunteerEvent> GetAllEvents()
         {
             var events = new List<VolunteerEvent>();
 
@@ -65,6 +68,9 @@ namespace VolunteerImpactTracker.Data
 
             foreach (var line in File.ReadAllLines(eventsFile))
             {
+                if (string.IsNullOrWhiteSpace(line))
+                    continue;
+
                 var parts = line.Split('|');
 
                 if (parts.Length == 5)
@@ -81,6 +87,45 @@ namespace VolunteerImpactTracker.Data
             }
 
             return events;
+        }
+
+        // IMPACT
+
+        public virtual void SaveImpactRecord(ImpactRecord record)
+        {
+            using (StreamWriter writer = new StreamWriter(impactFile, true))
+            {
+                writer.WriteLine($"{record.Date:yyyy-MM-dd}|{record.Organization}|{record.ImpactType}|{record.Quantity}");
+            }
+        }
+
+        public virtual List<ImpactRecord> GetAllImpactRecords()
+        {
+            var records = new List<ImpactRecord>();
+
+            if (!File.Exists(impactFile))
+                return records;
+
+            foreach (var line in File.ReadAllLines(impactFile))
+            {
+                if (string.IsNullOrWhiteSpace(line))
+                    continue;
+
+                var parts = line.Split('|');
+
+                if (parts.Length == 4)
+                {
+                    records.Add(new ImpactRecord
+                    {
+                        Date = DateTime.Parse(parts[0]),
+                        Organization = parts[1],
+                        ImpactType = parts[2],
+                        Quantity = int.Parse(parts[3])
+                    });
+                }
+            }
+
+            return records;
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using VolunteerImpactTracker.Data;
 using VolunteerImpactTracker.Models;
@@ -9,20 +10,22 @@ namespace VolunteerImpactTracker.Services
     {
         private readonly Repository _repository;
 
-        public VolunteerService()
+        public VolunteerService() : this(new Repository())
         {
-            _repository = new Repository();
         }
 
-        // -------- UC1: Log Volunteer Hours --------
-
-        public void LogHours(string organization, double hours)
+        public VolunteerService(Repository repository)
         {
+            _repository = repository;
+        }
+
+        public string LogHours(string organization, double hours)
+        {
+            if (string.IsNullOrWhiteSpace(organization))
+                return "Error: Organization is required.";
+
             if (hours <= 0)
-            {
-                Console.WriteLine("Error: Hours must be greater than 0.");
-                return;
-            }
+                return "Error: Hours must be greater than 0.";
 
             var entry = new VolunteerHourEntry
             {
@@ -32,44 +35,34 @@ namespace VolunteerImpactTracker.Services
             };
 
             _repository.SaveHourEntry(entry);
-            Console.WriteLine("Hours logged successfully!");
+            return "Hours logged successfully!";
         }
 
-        // -------- UC2: View Total Hours --------
-
-        public void ViewTotalHours()
+        public double GetTotalHours()
         {
             var entries = _repository.GetAllHourEntries();
-            double total = entries.Sum(e => e.Hours);
-
-            Console.WriteLine($"Total Volunteer Hours: {total}");
+            return entries.Sum(e => e.Hours);
         }
 
-        // -------- UC4: Add Volunteer Event --------
-
-        public void AddEvent(VolunteerEvent newEvent)
+        public List<string> GetOrganizationHistory()
         {
-            if (newEvent.EndTime <= newEvent.StartTime)
-            {
-                Console.WriteLine("Error: End time must be after start time.");
-                return;
-            }
+            var entries = _repository.GetAllHourEntries();
 
-            var existingEvents = _repository.GetAllEvents();
+            return entries
+                .Select(e => e.Organization)
+                .Where(o => !string.IsNullOrWhiteSpace(o))
+                .Distinct()
+                .OrderBy(o => o)
+                .ToList();
+        }
 
-            foreach (var existing in existingEvents)
-            {
-                if (existing.EventDate.Date == newEvent.EventDate.Date &&
-                    existing.StartTime < newEvent.EndTime &&
-                    newEvent.StartTime < existing.EndTime)
-                {
-                    Console.WriteLine("Conflict detected with an existing event.");
-                    return;
-                }
-            }
+        public double GetTotalHoursByDateRange(DateTime startDate, DateTime endDate)
+        {
+            var entries = _repository.GetAllHourEntries();
 
-            _repository.SaveEvent(newEvent);
-            Console.WriteLine("Event saved successfully.");
+            return entries
+                .Where(e => e.Date.Date >= startDate.Date && e.Date.Date <= endDate.Date)
+                .Sum(e => e.Hours);
         }
     }
 }

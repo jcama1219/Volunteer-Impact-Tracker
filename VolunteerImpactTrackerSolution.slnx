@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="VolunteerImpactTracker.Tests/VolunteerImpactTracker.Tests.csproj" />
+  <Project Path="VolunteerImpactTracker/VolunteerImpactTracker.csproj" />
+</Solution>
