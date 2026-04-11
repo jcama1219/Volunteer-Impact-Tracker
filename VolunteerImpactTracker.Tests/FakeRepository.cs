@@ -8,6 +8,7 @@ namespace VolunteerImpactTracker.Tests
     {
         private readonly List<VolunteerHourEntry> _hours = new();
         private readonly List<VolunteerEvent> _events = new();
+        private readonly List<ImpactRecord> _impact = new();
 
         public override void SaveHourEntry(VolunteerHourEntry entry)
         {
@@ -28,5 +29,16 @@ namespace VolunteerImpactTracker.Tests
         {
             return new List<VolunteerEvent>(_events);
         }
+
+        public override void SaveImpactRecord(ImpactRecord record)
+        {
+            _impact.Add(record);
+        }
+
+        public override List<ImpactRecord> GetAllImpactRecords()
+        {
+            return new List<ImpactRecord>(_impact);
+        }
     }
 }
+
