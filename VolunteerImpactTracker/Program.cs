@@ -22,10 +22,12 @@ namespace VolunteerImpactTracker
                 Console.WriteLine("5. View Organization History");
                 Console.WriteLine("6. View Hours by Date Range");
                 Console.WriteLine("7. View Upcoming Events");
+                Console.WriteLine("8. View Impact Summary");
+                Console.WriteLine("9. Edit Logged Volunteer Hours");
+                Console.WriteLine("10. Edit/Delete Impact Records");
                 Console.WriteLine("0. Exit");
                 Console.Write("Select option: ");
 
-                
                 if (!int.TryParse(Console.ReadLine(), out int choice))
                 {
                     Console.WriteLine("Invalid selection.");
@@ -182,6 +184,117 @@ namespace VolunteerImpactTracker
                             {
                                 Console.WriteLine($"{ev.EventDate:yyyy-MM-dd} | {ev.EventName} | {ev.Organization} | {ev.StartTime} - {ev.EndTime}");
                             }
+                        }
+                        break;
+
+                    case 8:
+                        var summary = impactService.GetImpactSummary();
+
+                        if (summary.Count == 0)
+                        {
+                            Console.WriteLine("No impact records found.");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Impact Summary:");
+                            foreach (var item in summary)
+                            {
+                                Console.WriteLine($"{item.Key}: {item.Value}");
+                            }
+                        }
+                        break;
+
+                    case 9:
+                        var hourEntries = volunteerService.GetAllHourEntries();
+
+                        if (hourEntries.Count == 0)
+                        {
+                            Console.WriteLine("No volunteer hour entries found.");
+                            break;
+                        }
+
+                        Console.WriteLine("Volunteer Hour Entries:");
+                        for (int i = 0; i < hourEntries.Count; i++)
+                        {
+                            Console.WriteLine($"{i + 1}. {hourEntries[i].Date:yyyy-MM-dd} | {hourEntries[i].Organization} | {hourEntries[i].Hours} hours");
+                        }
+
+                        Console.Write("Select entry number to edit: ");
+                        if (!int.TryParse(Console.ReadLine(), out int hourIndex))
+                        {
+                            Console.WriteLine("Invalid selection.");
+                            break;
+                        }
+
+                        Console.Write("New Organization: ");
+                        string newOrg = Console.ReadLine();
+
+                        Console.Write("New Hours: ");
+                        if (!double.TryParse(Console.ReadLine(), out double newHours))
+                        {
+                            Console.WriteLine("Invalid number format.");
+                            break;
+                        }
+
+                        Console.WriteLine(volunteerService.EditHourEntry(hourIndex - 1, newOrg, newHours));
+                        break;
+
+                    case 10:
+                        var impactRecords = impactService.GetAllImpactRecords();
+
+                        if (impactRecords.Count == 0)
+                        {
+                            Console.WriteLine("No impact records found.");
+                            break;
+                        }
+
+                        Console.WriteLine("Impact Records:");
+                        for (int i = 0; i < impactRecords.Count; i++)
+                        {
+                            Console.WriteLine($"{i + 1}. {impactRecords[i].Date:yyyy-MM-dd} | {impactRecords[i].Organization} | {impactRecords[i].ImpactType} | {impactRecords[i].Quantity}");
+                        }
+
+                        Console.Write("Select record number: ");
+                        if (!int.TryParse(Console.ReadLine(), out int impactIndex))
+                        {
+                            Console.WriteLine("Invalid selection.");
+                            break;
+                        }
+
+                        Console.Write("Type E to edit or D to delete: ");
+                        string action = Console.ReadLine()?.Trim().ToUpper();
+
+                        if (action == "D")
+                        {
+                            Console.WriteLine(impactService.DeleteImpactRecord(impactIndex - 1));
+                        }
+                        else if (action == "E")
+                        {
+                            Console.Write("New Organization: ");
+                            string editOrg = Console.ReadLine();
+
+                            Console.Write("New Impact Type: ");
+                            string editType = Console.ReadLine();
+
+                            Console.Write("New Quantity: ");
+                            if (!int.TryParse(Console.ReadLine(), out int editQuantity))
+                            {
+                                Console.WriteLine("Invalid quantity.");
+                                break;
+                            }
+
+                            Console.Write("New Date (yyyy-MM-dd): ");
+                            if (!DateTime.TryParse(Console.ReadLine(), out DateTime editDate))
+                            {
+                                Console.WriteLine("Invalid date format.");
+                                break;
+                            }
+
+                            Console.WriteLine(impactService.EditImpactRecord(impactIndex - 1, editOrg, editType, editQuantity, editDate));
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid action.");
                         }
                         break;
 

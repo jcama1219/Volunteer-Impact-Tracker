@@ -11,7 +11,7 @@ namespace VolunteerImpactTracker.Data
         private readonly string eventsFile = "events.txt";
         private readonly string impactFile = "impact.txt";
 
-        // HOURS 
+        // HOURS
 
         public virtual void SaveHourEntry(VolunteerHourEntry entry)
         {
@@ -49,7 +49,18 @@ namespace VolunteerImpactTracker.Data
             return entries;
         }
 
-        //  EVENTS 
+        public virtual void SaveAllHourEntries(List<VolunteerHourEntry> entries)
+        {
+            using (StreamWriter writer = new StreamWriter(hoursFile, false))
+            {
+                foreach (var entry in entries)
+                {
+                    writer.WriteLine($"{entry.Date:yyyy-MM-dd}|{entry.Organization}|{entry.Hours}");
+                }
+            }
+        }
+
+        // EVENTS
 
         public virtual void SaveEvent(VolunteerEvent ev)
         {
@@ -126,6 +137,17 @@ namespace VolunteerImpactTracker.Data
             }
 
             return records;
+        }
+
+        public virtual void SaveAllImpactRecords(List<ImpactRecord> records)
+        {
+            using (StreamWriter writer = new StreamWriter(impactFile, false))
+            {
+                foreach (var record in records)
+                {
+                    writer.WriteLine($"{record.Date:yyyy-MM-dd}|{record.Organization}|{record.ImpactType}|{record.Quantity}");
+                }
+            }
         }
     }
 }

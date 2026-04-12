@@ -20,6 +20,12 @@ namespace VolunteerImpactTracker.Tests
             return new List<VolunteerHourEntry>(_hours);
         }
 
+        public override void SaveAllHourEntries(List<VolunteerHourEntry> entries)
+        {
+            _hours.Clear();
+            _hours.AddRange(entries);
+        }
+
         public override void SaveEvent(VolunteerEvent ev)
         {
             _events.Add(ev);
@@ -39,6 +45,11 @@ namespace VolunteerImpactTracker.Tests
         {
             return new List<ImpactRecord>(_impact);
         }
+
+        public override void SaveAllImpactRecords(List<ImpactRecord> records)
+        {
+            _impact.Clear();
+            _impact.AddRange(records);
+        }
     }
 }
-

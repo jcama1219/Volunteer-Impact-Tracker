@@ -64,5 +64,30 @@ namespace VolunteerImpactTracker.Services
                 .Where(e => e.Date.Date >= startDate.Date && e.Date.Date <= endDate.Date)
                 .Sum(e => e.Hours);
         }
+
+        public List<VolunteerHourEntry> GetAllHourEntries()
+        {
+            return _repository.GetAllHourEntries();
+        }
+
+        public string EditHourEntry(int index, string organization, double hours)
+        {
+            var entries = _repository.GetAllHourEntries();
+
+            if (index < 0 || index >= entries.Count)
+                return "Error: Invalid entry selection.";
+
+            if (string.IsNullOrWhiteSpace(organization))
+                return "Error: Organization is required.";
+
+            if (hours <= 0)
+                return "Error: Hours must be greater than 0.";
+
+            entries[index].Organization = organization;
+            entries[index].Hours = hours;
+
+            _repository.SaveAllHourEntries(entries);
+            return "Volunteer hour entry updated successfully.";
+        }
     }
 }
